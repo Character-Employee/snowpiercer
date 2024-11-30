@@ -1,0 +1,347 @@
+<html><head><base href="." /><base target="_blank" /><style>
+body {
+    margin: 0;
+    padding: 20px;
+    background: #0a0a0a;
+    color: #ddd;
+    font-family: 'Arial', sans-serif;
+}
+
+.train-showcase {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: linear-gradient(180deg, #1a1a1a 0%, #000 100%);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+}
+
+.train-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    filter: contrast(120%) brightness(90%);
+}
+
+.snow-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.info-panel {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    position: relative;
+    z-index: 5;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin: 0 0 20px 0;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.spec-item {
+    padding: 15px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.spec-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.05);
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.control-btn {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 100;
+    overflow-y: auto;
+}
+
+.modal-content {
+    position: relative;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.track-map {
+    width: 100%;
+    height: 400px;
+    background: #111;
+    border-radius: 10px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.train-car {
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(255,255,255,0.05);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.train-car:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translate(0, -10px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--end-x), 100vh);
+        opacity: 0;
+    }
+}
+
+@keyframes trainMovement {
+    0% { stroke-dashoffset: 1000; }
+    100% { stroke-dashoffset: 0; }
+}
+</style></head><body>
+
+<div class="train-showcase">
+    <img src="/a/93fddcb9-f7c3-4eb9-af09-560ac458ff3d" alt="Snowpiercer Train" class="train-image">
+    
+    <svg class="snow-overlay" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="snowflake" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" style="stop-color:white;stop-opacity:0.8"/>
+                <stop offset="100%" style="stop-color:white;stop-opacity:0"/>
+            </radialGradient>
+        </defs>
+        <g id="snowflakes"></g>
+    </svg>
+
+    <div class="info-panel">
+        <h1>Snowpiercer - Eternal Engine</h1>
+        <p>The last bastion of humanity circles the frozen Earth on 1,001 cars of perpetual motion. This magnificent feat of engineering maintains the last survivors of humanity, eternally circumnavigating a world locked in an artificial ice age.</p>
+        
+        <div class="control-buttons">
+            <button class="control-btn" onclick="showMap()">View Global Track Map</button>
+            <button class="control-btn" onclick="showCars()">Train Car Directory</button>
+        </div>
+
+        <div class="specs">
+            <div class="spec-item">
+                <h3>Track Length</h3>
+                <p>40,075 km (Earth's Circumference)</p>
+            </div>
+            <div class="spec-item">
+                <h3>Cars</h3>
+                <p>1,001 cars of carefully maintained order</p>
+            </div>
+            <div class="spec-item">
+                <h3>Engine</h3>
+                <p>Eternal Engine - Perpetual motion drive system</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Modal -->
+<div id="mapModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('mapModal')">&times;</button>
+        <h2>Global Track Route</h2>
+        <div class="track-map">
+            <svg width="100%" height="100%" viewBox="0 0 800 400">
+                <defs>
+                    <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#4a9eff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#2979ff;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path d="M 50,200 Q 400,50 750,200 T 50,200" 
+                      fill="none" 
+                      stroke="url(#trackGradient)" 
+                      stroke-width="3"
+                      stroke-dasharray="10,5"
+                      style="animation: trainMovement 20s linear infinite"/>
+                <circle cx="50" cy="200" r="5" fill="#fff"/>
+                <!-- Animated train position -->
+                <circle id="trainPosition" cx="50" cy="200" r="8" fill="#ff4444"/>
+            </svg>
+        </div>
+        <p>The train completes one full revolution around the Earth every 366 days, maintaining a constant speed to ensure the Eternal Engine's optimal performance.</p>
+    </div>
+</div>
+
+<!-- Cars Modal -->
+<div id="carsModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('carsModal')">&times;</button>
+        <h2>Train Car Directory</h2>
+        <div id="carList"></div>
+    </div>
+</div>
+
+<script>
+const snowflakeCount = 100;
+const snowflakesGroup = document.getElementById('snowflakes');
+
+function createSnowflakes() {
+    for(let i = 0; i < snowflakeCount; i++) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        const size = Math.random() * 4 + 1;
+        
+        circle.setAttribute("r", size);
+        circle.setAttribute("fill", "url(#snowflake)");
+        
+        const endX = (Math.random() - 0.5) * 100;
+        circle.style.setProperty('--end-x', `${endX}px`);
+        
+        const duration = Math.random() * 4 + 3;
+        const delay = Math.random() * -5;
+        circle.style.animation = `snowfall ${duration}s linear ${delay}s infinite`;
+        
+        const x = Math.random() * 100 + "%";
+        const y = Math.random() * 100 + "%";
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        
+        snowflakesGroup.appendChild(circle);
+    }
+}
+
+createSnowflakes();
+
+setInterval(() => {
+    const snowflakes = document.querySelectorAll('circle');
+    snowflakes.forEach(snowflake => {
+        const currentEndX = parseFloat(snowflake.style.getPropertyValue('--end-x')) || 0;
+        const windShift = (Math.random() - 0.5) * 50;
+        snowflake.style.setProperty('--end-x', `${currentEndX + windShift}px`);
+    });
+}, 5000);
+
+// Modal functions
+function showMap() {
+    document.getElementById('mapModal').style.display = 'block';
+}
+
+function showCars() {
+    document.getElementById('carsModal').style.display = 'block';
+    displayCarList();
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Train car data
+const trainCars = [
+    { id: 1, name: "Engine (Eternal Engine)", description: "The sacred engine that powers the train's perpetual motion." },
+    { id: 2, name: "First Class Cabins", description: "Luxury accommodations for the train's elite passengers." },
+    { id: 3, name: "Greenhouse Cars", description: "Agricultural sections producing fresh food for the train's inhabitants." },
+    { id: 4, name: "Aquarium Car", description: "Houses marine life and provides fresh fish." },
+    { id: 5, name: "Night Car", description: "Entertainment and relaxation venue for passengers." },
+    { id: 6, name: "School Section", description: "Educational facilities for the train's children." },
+    { id: 7, name: "Medical Bay", description: "Healthcare facilities and emergency medical services." },
+    { id: 8, name: "Tail Section", description: "Housing for the train's working class." }
+];
+
+function displayCarList() {
+    const carList = document.getElementById('carList');
+    carList.innerHTML = '';
+    
+    trainCars.forEach(car => {
+        carList.innerHTML += `
+            <div class="train-car">
+                <h3>Car ${car.id}: ${car.name}</h3>
+                <p>${car.description}</p>
+            </div>
+        `;
+    });
+}
+
+// Animate train position on track
+const trainPosition = document.getElementById('trainPosition');
+function animateTrainPosition() {
+    const path = document.querySelector('path');
+    const pathLength = path.getTotalLength();
+    let progress = 0;
+
+    function update() {
+        progress = (progress + 0.001) % 1;
+        const point = path.getPointAtLength(progress * pathLength);
+        trainPosition.setAttribute('cx', point.x);
+        trainPosition.setAttribute('cy', point.y);
+        requestAnimationFrame(update);
+    }
+    update();
+}
+
+animateTrainPosition();
+</script>
+
+</body></html>
